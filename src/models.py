@@ -1,12 +1,14 @@
 import torch.nn as nn
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import types
 
 def get_model_wrapper(model_id: str, maximum_layer=None: int, keep_head=False: bool) -> nn.Module:
     if maximum_layer is not None:
-        return truncate_model(model_id, maximum_layer, keep_head)
+        return truncate_model(model_id, maximum_layer, keep_head), \
+            AutoTokenizer.from_pretrained(model_id)
     else:
-        return AutoModelForCausalLM.from_pretrained(model_id)
+        return AutoModelForCausalLM.from_pretrained(model_id), \
+            AutoTokenizer.from_pretrained(model_id)
 
 def truncate_model(model_id: str, maximum_layer: int, keep_head=False: bool) -> nn.Module:
     '''This truncates the LM up to the target layer, meaning
