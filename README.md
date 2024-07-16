@@ -24,7 +24,7 @@ whitebox_inversion/
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/whitebox_inversion.git
+   git clone https://github.com/vdlad/whitebox_inversion.git
    cd whitebox_inversion
    ```
 
