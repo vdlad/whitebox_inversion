@@ -5,7 +5,7 @@ This project implements a white-box inversion attack on language models.
 ## Project Structure
 
 ```
-whitebox-inversion/
+whitebox_inversion/
 ├── whitebox_inversion/
 │   ├── __init__.py
 │   ├── config.py
@@ -24,8 +24,8 @@ whitebox-inversion/
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/whitebox-inversion.git
-   cd whitebox-inversion
+   git clone https://github.com/yourusername/whitebox_inversion.git
+   cd whitebox_inversion
    ```
 
 2. Create and activate a virtual environment (optional but recommended):
