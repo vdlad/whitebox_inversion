@@ -2,10 +2,10 @@ import torch
 import wandb
 import optuna
 import dataclasses
-from src.config import Config, adapt_for_optuna
-from src.models import get_model_wrapper
-from src.attack import attack
-from src.loss_functions import return_maximise_logit_entropy_distribution
+from whitebox_inversion.config import Config, adapt_for_optuna
+from whitebox_inversion.models import get_model_wrapper
+from whitebox_inversion.attack import attack
+from whitebox_inversion.loss_functions import return_maximise_logit_entropy_distribution
 
 PROJECT = "whitebox-inversion"
 

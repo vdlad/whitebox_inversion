@@ -1,6 +1,12 @@
+# Whitebox Inversion
+
+This project implements a white-box inversion attack on language models.
+
+## Project Structure
+
 ```
 whitebox-inversion/
-├── src/
+├── whitebox_inversion/
 │   ├── __init__.py
 │   ├── config.py
 │   ├── models.py
@@ -9,15 +15,10 @@ whitebox-inversion/
 │   └── loss_functions.py
 ├── scripts/
 │   └── run_attack.py
+├── setup.py
 ├── requirements.txt
-├── README.md
-└── .gitignore
+└── README.md
 ```
-
-
-# Whitebox Inversion
-
-This project implements a white-box inversion attack on language models.
 
 ## Installation
 
@@ -27,10 +28,18 @@ This project implements a white-box inversion attack on language models.
    cd whitebox-inversion
    ```
 
-2. Install the required packages:
+2. Create and activate a virtual environment (optional but recommended):
    ```
-   pip install -r requirements.txt
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
    ```
+
+3. Install the project in editable mode:
+   ```
+   pip install -e .
+   ```
+
+   This will install all required dependencies and the project itself.
 
 ## Usage
 
@@ -40,21 +49,31 @@ To run the attack:
 python scripts/run_attack.py
 ```
 
-You can modify the configuration in `src/config.py` to adjust the attack parameters.
+You can modify the configuration in `whitebox_inversion/config.py` to adjust the attack parameters.
 
-## Project Structure
+## Development
 
-- `src/`: Contains the main source code
-  - `config.py`: Configuration class and Optuna adaptation
-  - `models.py`: Model handling functions
-  - `attack.py`: Main attack function
-  - `utils.py`: Utility functions
-  - `loss_functions.py`: Loss function implementations
-- `scripts/`: Contains runnable scripts
-  - `run_attack.py`: Main script to run the attack
-- `requirements.txt`: List of required packages
-- `README.md`: This file
+If you're developing this project:
+
+1. Install development dependencies:
+   ```
+   pip install -r requirements-dev.txt
+   ```
+
+2. Run tests:
+   ```
+   pytest
+   ```
+
+3. Check code style:
+   ```
+   flake8
+   ```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-[Your chosen license]
+[MIT]
