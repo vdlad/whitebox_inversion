@@ -20,6 +20,24 @@ def simplex_projection(tensor: torch.Tensor) -> torch.Tensor:
     projected = torch.max(tensor - threshold_per_row, torch.zeros_like(tensor))
     return projected
 
+def simplex_projection_memory_efficient(tensor: torch.Tensor) -> torch.Tensor:
+    original_shape = tensor.shape
+    tensor = tensor.view(original_shape[0], -1, original_shape[-1]) # flatten
+    batch, sequence, dims = tensor.shape
+
+    tensor = torch.sort(tensor, descending=True, dim=-1)[0]
+    cumulative = tensor.cumsum(dim=-1)
+    indices = torch.arange(1, dims + 1, device=tensor.device).expand(batch, sequence, -1).float()
+    threshold = (cumulative - 1) / indices
+    rho = (tensor > threshold).sum(dim=-1) - 1
+    del indices, cumulative
+    # Ensure rho doesn't go out of bounds
+    rho = torch.clamp(rho, 0, dims-1)
+    # Calculate threshold for each row
+    threshold_per_row = torch.gather(threshold, 2, rho.unsqueeze(-1))  # Shape: [batch, sequence, 1]
+    projected = torch.max(tensor - threshold_per_row, torch.tensor(0.0, device=tensor.device))
+    return projected.view(original_shape)
+
 def entropy_projection(tensor: torch.Tensor, entropy: float) -> torch.Tensor:
     positive_mask = (tensor > 0).float()
     positive_count = positive_mask.sum(dim=-1, keepdim=True)
