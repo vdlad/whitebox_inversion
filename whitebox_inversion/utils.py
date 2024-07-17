@@ -24,19 +24,17 @@ def simplex_projection(tensor: torch.Tensor) -> torch.Tensor:
     return torch.maximum(tensor - threshold_per_row, torch.zeros(1, dtype=tensor.dtype, device=tensor.device))
 
 def entropy_projection(tensor: torch.Tensor, entropy: float) -> torch.Tensor:
-    original_shape = tensor.shape
-    s = tensor.view(original_shape[0], -1, original_shape[-1])
-    positive_mask = (s > 0).float()
+    positive_mask = (tensor > 0).float()
     positive_count = positive_mask.sum(dim=-1, keepdim=True)
     c = positive_mask / positive_count
     R = torch.sqrt(1 - entropy - 1 / (positive_count))
     if R.isnan().any():
         return tensor
-    norm_s_c = torch.norm(s - c, dim=-1, keepdim=True)
+    norm_s_c = torch.norm(tensor - c, dim=-1, keepdim=True)
     needs_projection = (norm_s_c < R).float()
     does_not_need_projection = 1 - needs_projection
-    scaled_s = torch.where(needs_projection.bool(), (R / norm_s_c) * (s - c) + c, s)
+    scaled_s = torch.where(needs_projection.bool(), (R / norm_s_c) * (tensor - c) + c, tensor)
     projection = simplex_projection(scaled_s)
-    result = does_not_need_projection * s + needs_projection * projection
-    return result.view(original_shape)
+    result = does_not_need_projection * tensor + needs_projection * projection
+    return result
 
