@@ -5,6 +5,7 @@ from tqdm import tqdm
 import wandb
 from typing import Callable
 from .utils import to_relaxed_one_hot, simplex_projection, entropy_projection
+import gs
 
 def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False, discrete_loss_sample_rate: int = 1):
     device = next(model.parameters()).device
@@ -60,8 +61,12 @@ def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False,
         scheduler.step()
 
         inputs.data[:, suffix_slice] = simplex_projection(inputs.data[:, suffix_slice])
+        gc.collect()
+        torch.cuda.empty_cache()
         if current_entropy != 1.0:
             inputs.data[:, suffix_slice] = entropy_projection(inputs.data[:, suffix_slice], current_entropy)
+            gc.collect()
+            torch.cuda.empty_cache()
         current_entropy += entropy_delta
         discrete = torch.argmax(inputs.data[:, suffix_slice], dim=2)
         all_tokens[:, suffix_slice] = discrete
