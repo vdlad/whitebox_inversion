@@ -23,11 +23,7 @@ def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False,
 
     all_tokens = torch.cat([prefix_tokens, suffix_tokens], dim=1).to(device)
     suffix_slice = slice(prefix_tokens.shape[1], all_tokens.shape[1])
-
-    labels = all_tokens.clone().type(torch.int64)
-    labels[:, :suffix_slice.stop] = -100
-    labels = labels[:,1:].flatten(start_dim=0,end_dim=1)
-
+    
     inputs = to_relaxed_one_hot(all_tokens, tokenizer.vocab_size, hot_val=config.relax_hot_val)
     if config.randomise:
         random_values = torch.rand_like(inputs[:,suffix_slice])
@@ -43,7 +39,6 @@ def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False,
     inputs.shape[1] - 1, tokenizer.vocab_size
 
     scheduler = CosineAnnealingLR(optimizer, config.scheduler_t_0)
-
     best_loss = torch.inf * torch.ones(1, device=device)
     best_discrete = None
     current_entropy = config.start_entropy
@@ -51,7 +46,7 @@ def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False,
 
     for i in tqdm(range(1, config.iterations + 1)):
         input_embeds = (inputs @ model.transformer.wte.weight).to(device)
-        activations = (model(inputs_embeds=input_embeds))[:, -1, :]
+        activations = (model(inputs_embeds=input_embeds))[:, -1, :] # taking activation corresponding from the final (attended) token
         loss = loss_func(activations)
 
         optimizer.zero_grad()
@@ -84,7 +79,7 @@ def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False,
                     best_discrete = discrete
             if verbose:
                 current_discrete_text = [tokenizer.decode(x) for x in discrete[:3]]
-                print(f"[{i}] L-rel: {save_loss:.5f} / L-dis: {discrete_loss.flatten().mean():.5f} / Best: {best_loss.flatten().mean():.5f}")
+                print(f"[{i}] L-rel: {save_loss:.5f} / L-dis: {discrete_loss.mean():.5f} / Best: {best_loss.mean():.5f}")
                 print(f" |- Curr: {current_discrete_text}")
 
             if config.wandb_logging:
