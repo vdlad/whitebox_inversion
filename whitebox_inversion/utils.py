@@ -14,12 +14,12 @@ def to_relaxed_one_hot(tokens: torch.Tensor, vocab_size: int, hot_val: float = 1
     return one_hot
 
 def simplex_projection(tensor: torch.Tensor) -> torch.Tensor:
-    batch, sequence, dims = tensor.shape
+    d_batch, d_sequence, d_dims = tensor.shape
     mu, _ = torch.sort(tensor, descending=True, dim=-1)
     cumulative = mu.cumsum(dim=-1)
-    indices = torch.arange(1, dims + 1, device=tensor.device).expand(batch, sequence, -1)
+    indices = torch.arange(1, d_dims + 1, device=tensor.device).expand(d_batch, d_sequence, -1)
     threshold = (cumulative - 1) / indices
-    rho = torch.clamp((mu > threshold).sum(dim=-1) - 1, 0, dims-1)
+    rho = torch.clamp((mu > threshold).sum(dim=-1) - 1, 0, d_dims-1)
     threshold_per_row = torch.gather(threshold, 2, rho.unsqueeze(-1))
     return torch.maximum(tensor - threshold_per_row, torch.zeros(1, dtype=tensor.dtype, device=tensor.device))
 
