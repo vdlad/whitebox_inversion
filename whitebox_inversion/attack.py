@@ -41,6 +41,7 @@ def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False,
 
     scheduler = CosineAnnealingLR(optimizer, config.scheduler_t_0)
     best_loss = torch.inf * torch.ones(1, device=device)
+    avg_best_loss = best_loss.copy()
     best_discrete = None
     current_entropy = config.start_entropy
     entropy_delta = (config.stop_entropy - config.start_entropy) / config.iterations
@@ -78,21 +79,22 @@ def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False,
             with torch.no_grad():
                 activations_discrete = (model(all_tokens))[:, -1]
                 discrete_loss = loss_func(activations_discrete)
-                avg_loss_i, avg_best_loss = discrete_loss.mean(), best_loss.mean()
+                avg_loss_i = discrete_loss.mean()
                 if avg_loss_i < avg_best_loss:
                     best_loss = discrete_loss
+                    avg_best_loss = best_loss.mean()
                     best_discrete = discrete
             if verbose:
                 current_discrete_text = [tokenizer.decode(x) for x in discrete[:3]]
-                print(f"[{i}] L-rel: {save_loss:.5f} / L-dis: {discrete_loss.mean():.5f} / Best: {best_loss.mean():.5f}")
+                print(f"[{i}] L-rel: {save_loss:.5f} / L-dis: {avg_loss_i:.5f} / Best: {avg_best_loss:.5f}")
                 print(f" |- Curr: {current_discrete_text}")
 
             if config.wandb_logging:
                 wandb.log({
                     "iteration": i,
                     "relaxed_loss": save_loss,
-                    "avg_discrete_loss": avg_best_loss.item(),
-                    "avg_best_loss": avg_best_loss.item(),
+                    "avg_discrete_loss": avg_loss_i,
+                    "avg_best_loss": avg_best_loss,
                     "current_entropy": current_entropy,
                     "learning_rate": scheduler.get_last_lr()[0],
                 })
