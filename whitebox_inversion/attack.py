@@ -41,7 +41,7 @@ def attack(model, tokenizer, config, loss_func: Callable, verbose: bool = False,
 
     scheduler = CosineAnnealingLR(optimizer, config.scheduler_t_0)
     best_loss = torch.inf * torch.ones(1, device=device)
-    avg_best_loss = best_loss.copy()
+    avg_best_loss = best_loss.clone()
     best_discrete = None
     current_entropy = config.start_entropy
     entropy_delta = (config.stop_entropy - config.start_entropy) / config.iterations
