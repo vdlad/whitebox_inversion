@@ -1,6 +1,6 @@
 # Whitebox Inversion
 
-This project implements a white-box inversion attack on language models.
+This project implements a white-box inversion attack on language models. Right now contains a PGD implementation, but working on adding more!
 
 ## Project Structure
 
